@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const connectDB = require("./config/db");
+const errorHandler = require("./middleware/errorHandler");
 
 // Load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -33,3 +34,6 @@ if (process.env.NODE_ENV === "development") {
 
 // Mount routers
 app.use("/api/v1/bootcamps", bootcampsRouter);
+
+// Error handling middleware
+app.use(errorHandler);

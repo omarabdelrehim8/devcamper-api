@@ -1,3 +1,4 @@
+const customError = require("../utils/customError");
 const Bootcamp = require("../models/Bootcamp");
 
 // @desc       Get all bootcamps
@@ -9,8 +10,8 @@ exports.getBootcamps = async (req, res, next) => {
     res
       .status(200)
       .send({ success: true, count: bootcamps.length, data: bootcamps });
-  } catch (error) {
-    res.status(400).send({ success: false });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -21,13 +22,18 @@ exports.getBootcamp = async (req, res, next) => {
   try {
     const bootcamp = await Bootcamp.findById(req.params.id);
 
+    // Fires off if the id format is right (right lenght etc.) but no bootcamp was found in the database
     if (!bootcamp) {
-      return res.status(400).send({ success: false });
+      // We use next() to pass the created error instance to the errorHandler. That's because when we pass any argument to next(), Express handles that argument as an error object so it will automatically ignore other middleware functions and pass that error to the errorHandler middleware.
+      return next(
+        new customError(`Bootcamp not found with id of ${req.params.id}`, 404)
+      );
     }
 
     res.status(200).send({ success: true, data: bootcamp });
-  } catch (error) {
-    res.status(400).send({ success: false });
+  } catch (err) {
+    // Fires off if the id format is wrong or because of other unknown causes caused by user interaction
+    next(err);
   }
 };
 
@@ -38,8 +44,8 @@ exports.createBootcamp = async (req, res, next) => {
   try {
     const bootcamp = await Bootcamp.create(req.body);
     res.status(201).send({ success: true, data: bootcamp });
-  } catch (error) {
-    res.status(400).send({ success: false });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -54,12 +60,14 @@ exports.updateBootcamp = async (req, res, next) => {
     });
 
     if (!bootcamp) {
-      return res.status(400).send({ success: false });
+      return next(
+        new customError(`Bootcamp not found with id of ${req.params.id}`, 404)
+      );
     }
 
     res.status(200).send({ success: true, data: bootcamp });
-  } catch (error) {
-    res.status(400).send({ success: false });
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -71,11 +79,13 @@ exports.deleteBootcamp = async (req, res, next) => {
     const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
 
     if (!bootcamp) {
-      return res.status(400).send({ success: false });
+      return next(
+        new customError(`Bootcamp not found with id of ${req.params.id}`, 404)
+      );
     }
 
     res.status(200).send({ success: true, data: {} });
-  } catch (error) {
-    res.status(400).send({ success: false });
+  } catch (err) {
+    next(err);
   }
 };
