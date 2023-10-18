@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 
 const BootcampSchema = new mongoose.Schema({
   name: {
@@ -97,6 +98,12 @@ const BootcampSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+});
+
+// This is a mongoose middleware that creates a bootcamp slug from the name, we want this operation to run before the document is saved in the DB so we use .pre("save"). "this" keyword refers to the Schema, so we can access any field in it by using that keyword.
+BootcampSchema.pre("save", function (next) {
+  this.slug = slugify(this.name, { lower: true });
+  next();
 });
 
 module.exports = mongoose.model("Bootcamp", BootcampSchema);

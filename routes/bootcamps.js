@@ -9,6 +9,7 @@ const {
 
 const router = express.Router();
 
+// Route handlers
 router.route("/").get(getBootcamps).post(createBootcamp);
 
 router
