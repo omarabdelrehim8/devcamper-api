@@ -9,7 +9,44 @@ const Bootcamp = require("../models/Bootcamp");
 // @route      GET /api/v1/bootcamps
 // @access     Public
 exports.getBootcamps = asyncErrorHandler(async (req, res, next) => {
-  const bootcamps = await Bootcamp.find();
+  let query;
+
+  // Copy the object given by req.query
+  const reqQuery = { ...req.query };
+
+  // Fields to exclude, any param we put in this array will be removed
+  const removeFields = ["select", "sort"];
+
+  // Loop over removeFields and delete them from reqQuery
+  removeFields.forEach((param) => delete reqQuery[param]);
+
+  //Advanced filtering: req.query gives us an object that contains the URL's query string keys and values, we need to convert that object into a string to be able to manipulate it and add a $ before the mongoose operators gt|gte|lt|lte|in (greater than, greater than or equal .. etc.), we need to add it to be able to use it inside of mongoose methods like "find". After, we convert it back to an object to use it inside of the mongoose "find" method
+  let queryStr = JSON.stringify(reqQuery);
+
+  queryStr = queryStr.replace(
+    /\b(gt|gte|lt|lte|in)\b/g,
+    (match) => `$${match}`
+  );
+
+  // Finding resource
+  query = Bootcamp.find(JSON.parse(queryStr));
+
+  // Select Fields
+  if (req.query.select) {
+    const fields = req.query.select.split(",").join(" ");
+    query = query.select(fields);
+  }
+
+  // Sort
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(",").join(" ");
+    query = query.sort(sortBy);
+  } else {
+    query = query.sort("-createdAt");
+  }
+
+  // Executing query
+  const bootcamps = await query;
 
   res
     .status(200)
