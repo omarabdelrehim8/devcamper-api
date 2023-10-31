@@ -6,7 +6,7 @@ const errorHandler = (err, req, res, next) => {
   // Log to console for dev
   console.log(err);
 
-  // The error passed in the next() inside of the if statement, in the controllers files, is  already has a message and a statusCode set, so it will be directly passed to line 33. The error passed through the next() in the catch statement can be due to multiple causes caused by user interaction so we have to test which kind of error it is and then give it a custom message and a status code, that's what the error = {} is for, to declare a variable used to build the custom error in this case.
+  // The error passed in the next() inside of the if statement, in the controllers files, already has a message and a statusCode set, so it will be directly passed to line 33. The error passed through the next() in the catch statement or, in our case, caught by the asyncErrorHandler, can be due to multiple causes caused by user interaction so we have to test which kind of error it is and then give it a custom message and a status code, that's what the error = {} is for, to declare a variable used to build the custom error.
   let error = {};
 
   // Mongoose bad ObjectId
