@@ -28,8 +28,8 @@ exports.getBootcamps = asyncErrorHandler(async (req, res, next) => {
     (match) => `$${match}`
   );
 
-  // Finding resource
-  query = Bootcamp.find(JSON.parse(queryStr));
+  // Finding resource / populate the bootcamp objects with their courses
+  query = Bootcamp.find(JSON.parse(queryStr)).populate("courses");
 
   // Select fields to get: we can add "?select=value, value..etc" in the URL to only obtain the specific fields we want inside of the json objects we get as response. For example "?select= name, description". We use an if statement to make sure that the query string has a "select" param.
   if (req.query.select) {
@@ -135,13 +135,16 @@ exports.updateBootcamp = asyncErrorHandler(async (req, res, next) => {
 // @route      DELETE /api/v1/bootcamps/:id
 // @access     Private
 exports.deleteBootcamp = asyncErrorHandler(async (req, res, next) => {
-  const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+  // We can't use findByIdAndDelete() because it won't trigger the Cascade delete middleware in the Bootcamp model, so we just find the bootcamp by using findById() and then call bootcamp.deleteOne(), this will ensure that all courses pertaining to the bootcamp are deleted before the deletion of the bootcamp itself
+  const bootcamp = await Bootcamp.findById(req.params.id);
 
   if (!bootcamp) {
     return next(
       new customError(`Bootcamp not found with id of ${req.params.id}`, 404)
     );
   }
+
+  bootcamp.deleteOne();
 
   res.status(200).send({ success: true, data: {} });
 });
