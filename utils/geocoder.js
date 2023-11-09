@@ -1,3 +1,6 @@
+const dotenv = require("dotenv");
+dotenv.config({ path: "./config/config.env" });
+
 const nodeGeocoder = require("node-geocoder");
 
 const options = {
