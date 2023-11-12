@@ -16,23 +16,26 @@ const coursesRouter = require("./courses");
 
 const router = express.Router();
 
+// We add the protect function as a first parameter before the method in the routes we want to be protected. Wherever we put protect the user has to be logged in.
+const { protect } = require("../middleware/authentication");
+
 // Re-route into other resource routers
 router.use("/:bootcampId/courses", coursesRouter);
 
 // Route handlers
 router.route("/radius/:zipcode/:distance").get(getBootcampsInRadius);
 
-router.route("/:id/photo").put(bootcampPhotoUpload);
+router.route("/:id/photo").put(protect, bootcampPhotoUpload);
 
 router
   .route("/")
   .get(advancedResults(Bootcamp, "courses"), getBootcamps)
-  .post(createBootcamp);
+  .post(protect, createBootcamp);
 
 router
   .route("/:id")
   .get(getBootcamp)
-  .put(updateBootcamp)
-  .delete(deleteBootcamp);
+  .put(protect, updateBootcamp)
+  .delete(protect, deleteBootcamp);
 
 module.exports = router;
