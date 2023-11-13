@@ -29,10 +29,24 @@ exports.protect = asyncErrorHandler(async (req, res, next) => {
   // Verify token
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  console.log(decoded);
-
   // Whatever id is in that token which the user got by successfully logging in with correct credentials is going to be passed here
   req.user = await User.findById(decoded.id);
 
   next();
 });
+
+// Grant access to specific roles
+exports.authorize = (...roles) => {
+  // roles will be a variable containing an array of values that we pass in the function
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new customError(
+          `User role ${req.user.role} is not authorized to access this route`,
+          403
+        )
+      );
+    }
+    next();
+  };
+};
