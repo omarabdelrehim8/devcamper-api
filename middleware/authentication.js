@@ -8,7 +8,7 @@ exports.protect = asyncErrorHandler(async (req, res, next) => {
   let token;
 
   // When a request is made by the client, for example to create a new bootcamp, in the req header we would include an authorization header with the created token which is preceded by the word "Bearer"
-  // Check for the presence of auth header
+  // Check for the presence of authorization header
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")

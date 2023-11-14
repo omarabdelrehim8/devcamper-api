@@ -34,6 +34,21 @@ exports.getBootcamp = asyncErrorHandler(async (req, res, next) => {
 // @route      POST /api/v1/bootcamps
 // @access     Private
 exports.createBootcamp = asyncErrorHandler(async (req, res, next) => {
+  // Add user field to req.body
+  // Since we use the protect middleware for this route, we have access to the current logged in user document through req.user
+  req.body.user = req.user.id;
+
+  // If user role is not admin, check if user has already published a bootcamp. Only admins can publish more than one bootcamp, others should only be able to publish just one.
+  if (req.user.role !== "admin") {
+    const publishedBootcamp = await Bootcamp.findOne({ user: req.user.id });
+
+    if (publishedBootcamp) {
+      return next(
+        new customError(`User has already published a bootcamp`, 400)
+      );
+    }
+  }
+
   const bootcamp = await Bootcamp.create(req.body);
 
   res.status(201).send({ success: true, data: bootcamp });
