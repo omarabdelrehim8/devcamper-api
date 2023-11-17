@@ -47,6 +47,7 @@ exports.addCourse = asyncErrorHandler(async (req, res, next) => {
   // In the req body we will get all the course fields we want to include in the new course. These fields are inputted by the user and are submitted to the Course model. Some fields though have to be added manually by us developers, like the "bootcamp" field in the Course model, which ties the course to a bootcamp through its ID.
   // The line of code below is adding the bootcampId that we are getting from the req to the "bootcamp" field in the Course model
   req.body.bootcamp = req.params.bootcampId;
+  req.body.user = req.user.id;
 
   const bootcamp = await Bootcamp.findById(req.params.bootcampId);
 
@@ -54,6 +55,16 @@ exports.addCourse = asyncErrorHandler(async (req, res, next) => {
     return next(
       new customError(`No bootcamp with the id of ${req.params.bootcampId}`),
       404
+    );
+  }
+
+  // Make sure user is bootcamp owner
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new customError(
+        `User ${req.user.id} is not authorized to add a course to bootcamp ${bootcamp._id}`,
+        401
+      )
     );
   }
 
@@ -74,10 +85,21 @@ exports.updateCourse = asyncErrorHandler(async (req, res, next) => {
     );
   }
 
+  // Make sure user is course owner
+  if (course.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new customError(
+        `User ${req.user.id} is not authorized to update course ${course._id}`,
+        401
+      )
+    );
+  }
+
   course = await Course.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
+
   res.status(200).send({ success: true, data: course });
 });
 
@@ -91,6 +113,16 @@ exports.deleteCourse = asyncErrorHandler(async (req, res, next) => {
     return next(
       new customError(`No course with the id of ${req.params.id}`),
       404
+    );
+  }
+
+  // Make sure user is course owner
+  if (course.user.toString() !== req.user.id && req.user.role !== "admin") {
+    return next(
+      new customError(
+        `User ${req.user.id} is not authorized to delete course ${course._id}`,
+        401
+      )
     );
   }
 

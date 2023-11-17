@@ -1,6 +1,8 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { nextTick } = require("process");
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -38,7 +40,12 @@ const UserSchema = new mongoose.Schema({
 
 // Encrypt password using bcrypt
 // In mongoose 5.x, instead of calling next() manually, we can use a function that returns a promise. In particular, you can use async/await. So we don't have to call next() inside of the middleware.
-UserSchema.pre("save", async function () {
+UserSchema.pre("save", async function (next) {
+  // We add this to make sure that bcrypt.hash runs only if the password has been modified, otherwise everytime we save to the DB the password will be re-hashed and the user wouldn't be able to login. So if it was modified we will re-hash it, otherwise we call next().
+  if (!this.isModified("password")) {
+    next();
+  }
+
   // The higher the numberof rounds the more secure is the password but the heavier it is on the system, 10 is the recommended but for stronger hashing we can increase it to 12, though this will make the process slower which may introduce a slighty bigger delay
   // Salting the pw is important because it sets a defense against hash tables
   const salt = await bcrypt.genSalt(10);
@@ -60,6 +67,25 @@ UserSchema.methods.generateSignedJwtToken = function () {
 // Match user entered password to hashed password in database
 UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Generate and hash password token
+UserSchema.methods.getResetPasswordToken = function () {
+  // Generate token
+  // randomBytes() generate random data, 20 is the number of bytes we want to generate. It will give us a buffer so we need to convert it to a hex string
+  const resetToken = crypto.randomBytes(20).toString("hex");
+
+  // Hash token and set to resetPasswordToken field. Again this is a method that is going to be called on the user, so we have access to the resetPasswordExpire field.
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  // Set the expire field.
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+
+  // Here we will return the original token, not the hashed version
+  return resetToken;
 };
 
 module.exports = mongoose.model("User", UserSchema);
