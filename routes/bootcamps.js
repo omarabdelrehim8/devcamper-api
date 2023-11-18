@@ -9,13 +9,13 @@ const {
   bootcampPhotoUpload,
 } = require("../controllers/bootcamps");
 const Bootcamp = require("../models/Bootcamp");
-const advancedResults = require("../middleware/advancedResults");
 
 // Include other resource routers
 const coursesRouter = require("./courses");
 
 const router = express.Router();
 
+const advancedResults = require("../middleware/advancedResults");
 // We add the protect function as a first parameter before the method in the routes we want to be protected. Wherever we put protect the user has to be logged in.
 const { protect, authorize } = require("../middleware/authentication");
 

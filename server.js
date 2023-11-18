@@ -11,6 +11,7 @@ const errorHandler = require("./middleware/errorHandler");
 const bootcampsRouter = require("./routes/bootcamps");
 const coursesRouter = require("./routes/courses");
 const authRouter = require("./routes/authentication");
+const usersRouter = require("./routes/users");
 
 // Load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -50,6 +51,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/v1/bootcamps", bootcampsRouter);
 app.use("/api/v1/courses", coursesRouter);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/users", usersRouter);
 
 // Error handling middleware
 app.use(errorHandler);
