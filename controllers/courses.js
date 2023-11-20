@@ -69,6 +69,7 @@ exports.addCourse = asyncErrorHandler(async (req, res, next) => {
   }
 
   const course = await Course.create(req.body);
+
   res.status(200).send({ success: true, data: course });
 });
 
@@ -101,7 +102,7 @@ exports.updateCourse = asyncErrorHandler(async (req, res, next) => {
   });
 
   // This line of code will trigger the CourseSchema averageCost middleware to re-calculate the average after saving
-  await review.save();
+  await course.save();
 
   res.status(200).send({ success: true, data: course });
 });
@@ -130,5 +131,6 @@ exports.deleteCourse = asyncErrorHandler(async (req, res, next) => {
   }
 
   await course.deleteOne();
+
   res.status(200).send({ success: true, data: {} });
 });
