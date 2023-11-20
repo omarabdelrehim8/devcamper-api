@@ -12,6 +12,7 @@ const bootcampsRouter = require("./routes/bootcamps");
 const coursesRouter = require("./routes/courses");
 const authRouter = require("./routes/authentication");
 const usersRouter = require("./routes/users");
+const reviewsRouter = require("./routes/reviews");
 
 // Load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -52,6 +53,7 @@ app.use("/api/v1/bootcamps", bootcampsRouter);
 app.use("/api/v1/courses", coursesRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/reviews", reviewsRouter);
 
 // Error handling middleware
 app.use(errorHandler);

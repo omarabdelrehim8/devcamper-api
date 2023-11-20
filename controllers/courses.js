@@ -100,6 +100,9 @@ exports.updateCourse = asyncErrorHandler(async (req, res, next) => {
     runValidators: true,
   });
 
+  // This line of code will trigger the CourseSchema averageCost middleware to re-calculate the average after saving
+  await review.save();
+
   res.status(200).send({ success: true, data: course });
 });
 
