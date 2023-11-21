@@ -7,6 +7,9 @@ const cookieParser = require("cookie-parser");
 const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
 const xss = require("xss-clean");
+const rateLimit = require("express-rate-limit");
+const hpp = require("hpp");
+const cors = require("cors");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 
@@ -56,6 +59,20 @@ app.use(helmet());
 
 // Prevent XSS attacks
 app.use(xss());
+
+// Requests rate limiting
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 mins
+  max: 100, // Accepted number of requests during that time frame
+});
+
+app.use(limiter);
+
+// Prevent http param pollution
+app.use(hpp());
+
+// Enable CORS
+app.use(cors());
 
 // Set static folder. By making it a static folder we can access the files inside uploads directly by typing in the browser http://localhost:5000/uploads/photo_5d725a1b7b292f5f8ceff788.jpg (which is the image name). So basically we don't have to include /api/v1
 app.use(express.static(path.join(__dirname, "public")));
