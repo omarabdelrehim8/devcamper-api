@@ -5,6 +5,8 @@ const morgan = require("morgan");
 const fileupload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
 const mongoSanitize = require("express-mongo-sanitize");
+const helmet = require("helmet");
+const xss = require("xss-clean");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 
@@ -48,6 +50,12 @@ app.use(fileupload());
 
 // Sanitize Data and prevent NoSQL Injection
 app.use(mongoSanitize());
+
+// Set security headers
+app.use(helmet());
+
+// Prevent XSS attacks
+app.use(xss());
 
 // Set static folder. By making it a static folder we can access the files inside uploads directly by typing in the browser http://localhost:5000/uploads/photo_5d725a1b7b292f5f8ceff788.jpg (which is the image name). So basically we don't have to include /api/v1
 app.use(express.static(path.join(__dirname, "public")));
