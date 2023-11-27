@@ -86,3 +86,6 @@ app.use("/api/v1/reviews", reviewsRouter);
 
 // Error handling middleware
 app.use(errorHandler);
+
+// Set trust proxy
+app.set("trust proxy", true);
